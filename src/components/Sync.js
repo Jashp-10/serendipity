@@ -1,18 +1,20 @@
 import React from 'react';
 
-const Sync = ({ onSyncComplete }) => {
+const Sync = () => {
   const handleSync = () => {
-    // Mock sync action for the offline scenario
-    setTimeout(() => {
-      alert('Songs synced successfully');
-      onSyncComplete(); // Refresh the song list
-    }, 1000);
+    console.log("Sync button clicked"); // Debug log
+    if (!navigator.onLine) {
+      alert('You need to be connected to the internet to sync.');
+      return;
+    }
+    console.log("Redirecting to /auth/google");
+    window.location.href = 'http://localhost:5000/auth/google'; // Ensure this URL is correct
   };
 
   return (
-    <div style={{ textAlign: 'center', padding: '20px' }}>
-      <button onClick={handleSync}>Sync Liked Songs</button>
-    </div>
+    <button onClick={handleSync} className="sync-button">
+      Sync with Spotify
+    </button>
   );
 };
 

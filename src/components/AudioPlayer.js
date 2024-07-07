@@ -1,16 +1,22 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './AudioPlayer.css';
 
 const AudioPlayer = ({ song, onPrevious, onNext }) => {
-  const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const audioRef = useRef(null);
 
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.addEventListener('timeupdate', handleTimeUpdate);
-      audioRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
+      audioRef.current.pause();
+      audioRef.current.src = `/LocalSongs/${song}`;
+      audioRef.current.load();
+      audioRef.current.onloadedmetadata = () => {
+        setDuration(audioRef.current.duration);
+        audioRef.current.play();
+        setIsPlaying(true);
+      };
     }
   }, [song]);
 
@@ -27,18 +33,18 @@ const AudioPlayer = ({ song, onPrevious, onNext }) => {
     setCurrentTime(audioRef.current.currentTime);
   };
 
-  const handleLoadedMetadata = () => {
-    setDuration(audioRef.current.duration);
-  };
-
-  const handleTimeChange = (e) => {
+  const handleProgressChange = (e) => {
     audioRef.current.currentTime = e.target.value;
-    setCurrentTime(audioRef.current.currentTime);
+    setCurrentTime(e.target.value);
   };
 
   return (
     <div className="audio-player">
-      <audio ref={audioRef} src={`LocalSongs/${song}`} className="audio-control">
+      <audio
+        ref={audioRef}
+        onTimeUpdate={handleTimeUpdate}
+      >
+        <source src={`/LocalSongs/${song}`} type="audio/mpeg" />
         Your browser does not support the audio element.
       </audio>
       <div className="controls">
@@ -46,17 +52,15 @@ const AudioPlayer = ({ song, onPrevious, onNext }) => {
         <button onClick={handlePlayPause}>{isPlaying ? 'Pause' : 'Play'}</button>
         <button onClick={onNext}>Next</button>
       </div>
-      <div className="timeline">
+      <div className="progress-bar">
         <input
           type="range"
           min="0"
           max={duration}
           value={currentTime}
-          onChange={handleTimeChange}
+          onChange={handleProgressChange}
         />
-        <div className="time">
-          {Math.floor(currentTime / 60)}:{Math.floor(currentTime % 60).toString().padStart(2, '0')} / {Math.floor(duration / 60)}:{Math.floor(duration % 60).toString().padStart(2, '0')}
-        </div>
+        <div>{new Date(currentTime * 1000).toISOString().substr(11, 8)} / {new Date(duration * 1000).toISOString().substr(11, 8)}</div>
       </div>
     </div>
   );

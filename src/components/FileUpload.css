@@ -1,0 +1,31 @@
+.file-upload {
+    margin-top: 20px;
+  }
+  
+  .upload-button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #1db954;
+    color: white;
+    border: none;
+    border-radius: 5px;
+  }
+  
+  .progress-bar {
+    margin-top: 10px;
+    width: 100%;
+    background-color: #f3f3f3;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  .progress {
+    height: 20px;
+    background-color: #1db954;
+    color: white;
+    text-align: center;
+    line-height: 20px;
+  }
+  

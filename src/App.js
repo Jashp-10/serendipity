@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import SongList from './components/SongList';
 import AudioPlayer from './components/AudioPlayer';
+import Sync from './components/Sync';
+import FileUpload from './components/FileUpload';
 import './App.css';
 
 const App = () => {
   const [songs, setSongs] = useState([]);
   const [currentSong, setCurrentSong] = useState(null);
+  const [likedSongs, setLikedSongs] = useState([]);
 
   useEffect(() => {
     const loadSongs = async () => {
       try {
         const response = await fetch('/LocalSongs');
         const songs = await response.json();
-        console.log('Fetched songs:', songs); // Debugging output
         setSongs(songs);
       } catch (error) {
         console.error('Error loading songs:', error);
@@ -20,6 +22,20 @@ const App = () => {
     };
 
     loadSongs();
+  }, []);
+
+  const fetchLikedSongs = async () => {
+    try {
+      const response = await fetch('/likedSongs');
+      const likedSongs = await response.json();
+      setLikedSongs(likedSongs);
+    } catch (error) {
+      console.error('Error fetching liked songs:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLikedSongs();
   }, []);
 
   const handleNext = () => {
@@ -38,6 +54,16 @@ const App = () => {
     <div className="app-container">
       <div className="song-list-container">
         <SongList songs={songs} onSelect={setCurrentSong} />
+        <Sync /> {/* Ensure this component is correctly placed */}
+        <FileUpload />
+        <div>
+          <h3>Liked Songs</h3>
+          <ul>
+            {likedSongs.map((song) => (
+              <li key={song.song_id}>{song.song_name} by {song.artist}</li>
+            ))}
+          </ul>
+        </div>
       </div>
       <div className="player-container">
         {currentSong ? (
