@@ -1,48 +1,71 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './FileUpload.css';
 
 const FileUpload = () => {
-  const [selectedFiles, setSelectedFiles] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [songs, setSongs] = useState([]);
+  const [likedSongs, setLikedSongs] = useState([]);
 
-  const handleFileChange = (e) => {
-    setSelectedFiles(e.target.files);
-  };
+  useEffect(() => {
+    const fetchSongs = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/LocalSongs');
+        setSongs(response.data);
+      } catch (error) {
+        console.error('Error fetching songs:', error);
+      }
+    };
+
+    const fetchLikedSongs = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/likedSongs');
+        setLikedSongs(response.data);
+      } catch (error) {
+        console.error('Error fetching liked songs:', error);
+      }
+    };
+
+    fetchSongs();
+    fetchLikedSongs();
+  }, []);
 
   const handleUpload = async () => {
-    if (!selectedFiles) return;
-
-    const formData = new FormData();
-    for (let i = 0; i < selectedFiles.length; i++) {
-      formData.append('files', selectedFiles[i]);
-    }
-
     try {
-      const response = await axios.post('/upload', formData, {
-        onUploadProgress: (progressEvent) => {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setUploadProgress(progress);
-        }
-      });
-
-      console.log('Files uploaded successfully:', response.data);
-      setUploadProgress(0); // Reset progress after successful upload
+      const response = await axios.post('http://localhost:5000/download-songs');
+      if (response.status === 200) {
+        alert('Download started');
+      }
     } catch (error) {
-      console.error('Error uploading files:', error);
-      setUploadProgress(0); // Reset progress on error
+      console.error('Error downloading songs:', error);
+      alert('Error downloading songs');
     }
   };
 
   return (
-    <div className="file-upload">
-      <input type="file" multiple onChange={handleFileChange} />
-      <button onClick={handleUpload} className="upload-button">Upload Songs</button>
-      {uploadProgress > 0 && (
-        <div className="progress-bar">
-          <div className="progress" style={{ width: `${uploadProgress}%` }}>{uploadProgress}%</div>
-        </div>
-      )}
+    <div>
+      <div>
+        <h3>Local Songs</h3>
+        <ul>
+          {songs.map((song, index) => (
+            <li key={index}>{song}</li>
+          ))}
+        </ul>
+      </div>
+      <button onClick={handleUpload}>Sync with Spotify</button>
+      <div>
+        <h3>Upload Songs</h3>
+        <input type="file" multiple={false} />
+        <button onClick={handleUpload}>Upload Songs</button>
+      </div>
+      <div>
+        <h3>Liked Songs</h3>
+        <ul>
+          {likedSongs.map((song, index) => (
+            <li key={index}>
+              {song.song_name} by {song.artist}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };

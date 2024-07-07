@@ -8,6 +8,7 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const { exec } = require('child_process');
 
 const app = express();
 
@@ -115,6 +116,19 @@ app.get('/likedSongs', (req, res) => {
   } else {
     res.json([]);
   }
+});
+
+app.post('/download-songs', (req, res) => {
+  const scriptPath = 'C:\\Users\\jashp\\OneDrive\\Desktop\\vacation doin\\PROJECTS\\Serendipity\\serendipity\\youtube_downloader.py';
+  exec(`python "${scriptPath}"`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`exec error: ${error}`);
+      return res.status(500).json({ error: `Error executing Python script: ${error.message}`, stderr });
+    }
+    console.log(`stdout: ${stdout}`);
+    console.error(`stderr: ${stderr}`);
+    res.status(200).json({ message: 'Download started', stdout, stderr });
+  });
 });
 
 const PORT = process.env.PORT || 5000;
